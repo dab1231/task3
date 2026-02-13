@@ -1,12 +1,16 @@
 package com.nik.currencyexchanger.dao;
 
 import com.nik.currencyexchanger.entity.ExchangeRate;
+import com.nik.currencyexchanger.exception.DataBaseException;
+import com.nik.currencyexchanger.exception.ExchangeRateAlreadyExistsException;
 import com.nik.currencyexchanger.util.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +32,42 @@ public class ExchangeRateDao {
             WHERE (base_currency_id = ? AND target_currency_id = ?) OR (target_currency_id = ? AND base_currency_id = ?) 
             """;
 
+    private static final String INSERT_SQL = """
+            INSERT INTO ExchangeRates (base_currency_id, target_currency_id, rate) 
+            VALUES (?, ?, ?) 
+            """;
+
     private ExchangeRateDao(){
 
     }
 
     public static ExchangeRateDao getInstance(){
         return INSTANCE;
+    }
+
+    public static Optional<ExchangeRate> save(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
+        try (var connection = ConnectionManager.get();
+            var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setInt(1, baseCurrencyId);
+            preparedStatement.setInt(2,targetCurrencyId);
+            preparedStatement.setBigDecimal(3, rate);
+            preparedStatement.executeUpdate();
+
+            var resultSet = preparedStatement.getGeneratedKeys();
+            ExchangeRate exchangeRate = null;
+            if(resultSet.next()){
+                var id = resultSet.getInt("id");
+                exchangeRate = buildExchangeRate(resultSet);
+            }
+            return Optional.ofNullable(exchangeRate);
+
+        }catch (SQLException e){
+            int errorCode = e.getErrorCode();
+            if(errorCode == 19 || errorCode == 2067){
+                throw new ExchangeRateAlreadyExistsException();
+            }
+            throw new DataBaseException("DB error", e);
+        }
     }
 
     public static List<ExchangeRate> findAll(){
