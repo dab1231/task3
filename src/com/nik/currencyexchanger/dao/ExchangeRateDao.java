@@ -3,11 +3,11 @@ package com.nik.currencyexchanger.dao;
 import com.nik.currencyexchanger.entity.ExchangeRate;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateAlreadyExistsException;
+import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
 import com.nik.currencyexchanger.util.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -37,12 +37,35 @@ public class ExchangeRateDao {
             VALUES (?, ?, ?) 
             """;
 
+    private static final String UPDATE_SQL = """
+            UPDATE ExchangeRates
+            SET rate = ?
+            WHERE base_currency_id = ? AND target_currency_id = ?
+            """;
+
     private ExchangeRateDao(){
 
     }
 
     public static ExchangeRateDao getInstance(){
         return INSTANCE;
+    }
+
+    public static Optional<ExchangeRate> update(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
+        try (var connection = ConnectionManager.get();
+            var  preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
+            preparedStatement.setBigDecimal(1, rate);
+            preparedStatement.setInt(2, baseCurrencyId);
+            preparedStatement.setInt(3, targetCurrencyId);
+
+            var executed = preparedStatement.executeUpdate();
+            if(executed == 0){
+                throw new ExchangeRateNotFoundException();
+            }
+            return findByCurrenciesId(baseCurrencyId, targetCurrencyId);
+        } catch (SQLException e){
+            throw new DataBaseException("Failed to update exchange rate",e);
+        }
     }
 
     public static Optional<ExchangeRate> save(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
@@ -55,7 +78,7 @@ public class ExchangeRateDao {
 
             var resultSet = preparedStatement.getGeneratedKeys();
             if(resultSet.next()){
-                var id = resultSet.getInt("id");
+                var id = resultSet.getInt(1);
                 ExchangeRate exchangeRate = new ExchangeRate(
                         id,
                         baseCurrencyId,
@@ -69,7 +92,7 @@ public class ExchangeRateDao {
         }catch (SQLException e){
             int errorCode = e.getErrorCode();
             if(errorCode == 19 || errorCode == 2067){
-                throw new ExchangeRateAlreadyExistsException();
+                throw new ExchangeRateAlreadyExistsException(baseCurrencyId, targetCurrencyId);
             }
             throw new DataBaseException("DB error", e);
         }
