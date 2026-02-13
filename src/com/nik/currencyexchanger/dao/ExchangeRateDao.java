@@ -54,12 +54,17 @@ public class ExchangeRateDao {
             preparedStatement.executeUpdate();
 
             var resultSet = preparedStatement.getGeneratedKeys();
-            ExchangeRate exchangeRate = null;
             if(resultSet.next()){
                 var id = resultSet.getInt("id");
-                exchangeRate = buildExchangeRate(resultSet);
+                ExchangeRate exchangeRate = new ExchangeRate(
+                        id,
+                        baseCurrencyId,
+                        targetCurrencyId,
+                        rate
+                );
+                return Optional.of(exchangeRate);
             }
-            return Optional.ofNullable(exchangeRate);
+            throw new DataBaseException("Fail with generate id");
 
         }catch (SQLException e){
             int errorCode = e.getErrorCode();
