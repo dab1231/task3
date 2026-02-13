@@ -3,7 +3,6 @@ package com.nik.currencyexchanger.dao;
 import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.util.ConnectionManager;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -104,7 +103,7 @@ public class CurrencyDao {
 
     public void update(Currency currency){
         try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+             var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setString(1, currency.getCode());
             preparedStatement.setString(2, currency.getFull_name());
             preparedStatement.setString(3, currency.getSign());
