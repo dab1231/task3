@@ -126,8 +126,8 @@ public class ExchangeRateDao {
             ExchangeRate reverseRate = null;
             if (resultSet.next()) {
                 ExchangeRate exchangeRateFromDb = buildExchangeRate(resultSet);
-                if (resultSet.getInt("base_currency_id") == baseId
-                        && resultSet.getInt("target_currency_id") == targetId) {
+                if (exchangeRateFromDb.getBaseCurrencyId() == baseId
+                        && exchangeRateFromDb.getTargetCurrencyId() == targetId) {
                     reverseRate = exchangeRateFromDb;
                 } else {
                     reverseRate = getReverseRate(exchangeRateFromDb);
