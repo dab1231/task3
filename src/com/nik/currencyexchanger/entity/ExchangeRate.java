@@ -17,4 +17,8 @@ public class ExchangeRate {
         this.targetCurrencyId = targetCurrencyId;
         this.rate = rate;
     }
+
+    public ExchangeRate(){
+
+    }
 }

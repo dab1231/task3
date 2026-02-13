@@ -1,12 +1,10 @@
 package com.nik.currencyexchanger.dao;
 
-import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.entity.ExchangeRate;
 import com.nik.currencyexchanger.util.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -56,33 +54,43 @@ public class ExchangeRateDao {
     public static Optional<ExchangeRate> findByCurrenciesId(int baseId, int targetId){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(SELECT_BY_CURRENCIES_ID_SQL)) {
+            preparedStatement.setInt(1,baseId);
+            preparedStatement.setInt(2,targetId);
+            preparedStatement.setInt(3,targetId);
+            preparedStatement.setInt(4,baseId);
+
             var resultSet = preparedStatement.executeQuery();
 
-            ExchangeRate exchangeRate = null;
-            if(resultSet.next()){
-                if(resultSet.getInt("base_currency_id") == baseId
-                    && resultSet.getInt("target_currency_id") == targetId){
-                    exchangeRate = buildExchangeRate(resultSet);
-                }
-                else{
-                    var reverseRate = getReverseRate(exchangeRate);
+            ExchangeRate reverseRate = null;
+            if (resultSet.next()) {
+                ExchangeRate exchangeRateFromDb = buildExchangeRate(resultSet);
+                if (resultSet.getInt("base_currency_id") == baseId
+                        && resultSet.getInt("target_currency_id") == targetId) {
+                    exchangeRateFromDb = buildExchangeRate(resultSet);
+                    reverseRate = exchangeRateFromDb;
+                } else {
+                    reverseRate = getReverseRate(exchangeRateFromDb);
                 }
             }
-            return Optional.ofNullable(exchangeRate);
+            return Optional.ofNullable(reverseRate);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static ExchangeRate getReverseRate(ExchangeRate exchangeRate){
-        var baseCurrencyId = exchangeRate.getBaseCurrencyId();
-        var targetCurrencyId = exchangeRate.getTargetCurrencyId();
-        BigDecimal originalRate = exchangeRate.getRate();
-        BigDecimal reverseRate = originalRate.ONE.divide(originalRate, DECIMAL_SCALE, ROUNDING_MODE);
-        exchangeRate.setRate(reverseRate);
-        exchangeRate.setBaseCurrencyId(targetCurrencyId);
-        exchangeRate.setTargetCurrencyId(baseCurrencyId);
-        return exchangeRate;
+    private static ExchangeRate getReverseRate(ExchangeRate originalExchangeRate){
+
+        var baseCurrencyId = originalExchangeRate.getBaseCurrencyId();
+        var targetCurrencyId = originalExchangeRate.getTargetCurrencyId();
+        BigDecimal originalRate = originalExchangeRate.getRate();
+        BigDecimal reverseRate = BigDecimal.ONE.divide(originalRate, DECIMAL_SCALE, ROUNDING_MODE);
+
+        ExchangeRate reversedExchangeRate = new ExchangeRate();
+        reversedExchangeRate.setRate(reverseRate);
+        reversedExchangeRate.setBaseCurrencyId(targetCurrencyId);
+        reversedExchangeRate.setTargetCurrencyId(baseCurrencyId);
+        reversedExchangeRate.setId(originalExchangeRate.getId());
+        return reversedExchangeRate;
     }
 
     private static ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {
