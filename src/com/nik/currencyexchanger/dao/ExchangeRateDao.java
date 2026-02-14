@@ -109,7 +109,7 @@ public class ExchangeRateDao {
             }
             return exchangeRates;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataBaseException("DB error",e);
         }
     }
 
@@ -135,7 +135,7 @@ public class ExchangeRateDao {
             }
             return Optional.ofNullable(reverseRate);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataBaseException("DB error",e);
         }
     }
 

@@ -1,8 +1,6 @@
 package com.nik.currencyexchanger.service;
 
 import com.nik.currencyexchanger.dao.ExchangeRateDao;
-import com.nik.currencyexchanger.dto.CurrencyDto;
-import com.nik.currencyexchanger.dto.ExchangeDto;
 import com.nik.currencyexchanger.dto.ExchangeRateDto;
 import com.nik.currencyexchanger.entity.ExchangeRate;
 
@@ -28,7 +26,7 @@ public class ExchangeRateService {
         return exchangeRateDtos;
     }
 
-    public ExchangeRateDto buildDto(ExchangeRate exchangeRate){
+    private ExchangeRateDto buildDto(ExchangeRate exchangeRate){
         return new ExchangeRateDto(
                 exchangeRate.getId(),
                 currencyService.findById(exchangeRate.getBaseCurrencyId()),

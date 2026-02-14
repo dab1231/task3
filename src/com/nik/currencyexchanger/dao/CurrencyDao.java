@@ -98,7 +98,7 @@ public class CurrencyDao {
             }
             return currencies;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataBaseException("DB error",e);
         }
     }
 
@@ -123,7 +123,7 @@ public class CurrencyDao {
             }
             return Optional.ofNullable(currency);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataBaseException("DB error",e);
         }
     }
 
@@ -137,7 +137,7 @@ public class CurrencyDao {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataBaseException("DB error",e);
         }
     }
 }
