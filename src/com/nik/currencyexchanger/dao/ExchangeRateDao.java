@@ -68,7 +68,7 @@ public class ExchangeRateDao {
         }
     }
 
-    public Optional<ExchangeRate> save(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
+    public ExchangeRate save(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setInt(1, baseCurrencyId);
@@ -85,7 +85,7 @@ public class ExchangeRateDao {
                         targetCurrencyId,
                         rate
                 );
-                return Optional.of(exchangeRate);
+                return exchangeRate;
             }
             throw new DataBaseException("Fail with generate id");
 

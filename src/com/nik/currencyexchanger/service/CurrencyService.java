@@ -21,7 +21,7 @@ public class CurrencyService {
         return INSTANCE;
     }
 
-    public List<CurrencyDto> findAll(){
+    public List<CurrencyDto> getAllCurrencies(){
         var currenciesEntity = currencyDao.findAll();
         List<CurrencyDto> currencyDtos = new ArrayList<>();
         for(Currency currency : currenciesEntity){
@@ -30,19 +30,19 @@ public class CurrencyService {
         return currencyDtos;
     }
 
-    public CurrencyDto findByCode(String code){
+    public CurrencyDto getCurrencyByCode(String code){
         var currencyOptional = currencyDao.findByCode(code);
         var currency = currencyOptional.orElseThrow(() -> new CurrencyNotFoundException(code));
         return buildDto(currency);
     }
 
-    public CurrencyDto findById(int id){
+    public CurrencyDto getCurrencyById(int id){
         var currencyOptional = currencyDao.findById(id);
         var currency = currencyOptional.orElseThrow(() -> new CurrencyNotFoundException(id));
         return buildDto(currency);
     }
 
-    public CurrencyDto create(String name, String code, String sign){
+    public CurrencyDto createCurrency(String name, String code, String sign){
         Currency currencyWithoutId = new Currency(0, code, name, sign);
         var currency = currencyDao.create(currencyWithoutId);
         return buildDto(currency);
