@@ -51,7 +51,7 @@ public class ExchangeRateDao {
         return INSTANCE;
     }
 
-    public static Optional<ExchangeRate> update(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
+    public Optional<ExchangeRate> update(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
         try (var connection = ConnectionManager.get();
             var  preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setBigDecimal(1, rate);
@@ -68,7 +68,7 @@ public class ExchangeRateDao {
         }
     }
 
-    public static Optional<ExchangeRate> save(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
+    public Optional<ExchangeRate> save(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setInt(1, baseCurrencyId);
@@ -98,7 +98,7 @@ public class ExchangeRateDao {
         }
     }
 
-    public static List<ExchangeRate> findAll(){
+    public List<ExchangeRate> findAll(){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(SELECT_ALL_SQL)) {
             var resultSet = preparedStatement.executeQuery();
@@ -113,7 +113,7 @@ public class ExchangeRateDao {
         }
     }
 
-    public static Optional<ExchangeRate> findByCurrenciesId(int baseId, int targetId){
+    public Optional<ExchangeRate> findByCurrenciesId(int baseId, int targetId){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(SELECT_BY_CURRENCIES_ID_SQL)) {
             preparedStatement.setInt(1,baseId);
@@ -139,7 +139,7 @@ public class ExchangeRateDao {
         }
     }
 
-    private static ExchangeRate getReverseRate(ExchangeRate originalExchangeRate){
+    private ExchangeRate getReverseRate(ExchangeRate originalExchangeRate){
 
         var baseCurrencyId = originalExchangeRate.getBaseCurrencyId();
         var targetCurrencyId = originalExchangeRate.getTargetCurrencyId();
@@ -154,7 +154,7 @@ public class ExchangeRateDao {
         return reversedExchangeRate;
     }
 
-    private static ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {
+    private ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {
         return  new ExchangeRate(
                 resultSet.getInt("id"),
                 resultSet.getInt("base_currency_id"),

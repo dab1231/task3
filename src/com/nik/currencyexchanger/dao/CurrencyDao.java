@@ -2,11 +2,9 @@ package com.nik.currencyexchanger.dao;
 
 import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.exception.CurrencyAlreadyExistsException;
-import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.util.ConnectionManager;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,8 +17,7 @@ public class CurrencyDao {
     private static final CurrencyDao INSTANCE = new CurrencyDao();
 
     private static final String INSERT_SQL = """
-            INSERT 
-            INTO Currency (code, full_name, sign) 
+            INSERT INTO Currency (code, full_name, sign) 
             VALUES
             (?,?,?) 
             """;
@@ -52,7 +49,7 @@ public class CurrencyDao {
         return INSTANCE;
     }
 
-    public static Optional<Currency> findByCode(String code){
+    public Optional<Currency> findByCode(String code){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(SELECT_BY_CODE_SQL)) {
             preparedStatement.setString(1, code);
@@ -68,7 +65,7 @@ public class CurrencyDao {
         }
     }
 
-    public static Currency insert(Currency currency){
+    public Currency create(Currency currency){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, currency.getCode());
@@ -90,7 +87,7 @@ public class CurrencyDao {
         }
     }
 
-    public static List<Currency> findAll(){
+    public List<Currency> findAll(){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(FIND_ALL_SQL)) {
             var resultSet = preparedStatement.executeQuery();
@@ -105,7 +102,7 @@ public class CurrencyDao {
         }
     }
 
-    private static Currency buildCurrency(ResultSet resultSet) throws SQLException {
+    private Currency buildCurrency(ResultSet resultSet) throws SQLException {
         return  new Currency(
                 resultSet.getInt("id"),
                 resultSet.getString("code"),
@@ -114,7 +111,7 @@ public class CurrencyDao {
         );
     }
 
-    public static Optional<Currency> findById(int id){
+    public Optional<Currency> findById(int id){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             preparedStatement.setInt(1,id);
@@ -130,7 +127,7 @@ public class CurrencyDao {
         }
     }
 
-    public static void update(Currency currency){
+    public void update(Currency currency){
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setString(1, currency.getCode());
