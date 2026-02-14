@@ -16,9 +16,7 @@ public class ExchangeRateService {
 
     }
 
-    public List<ExchangeRateDto> findAll(){
-        var exchangeRates = exchangeRateDao.findAll();
-    }
+
 
 
 }
