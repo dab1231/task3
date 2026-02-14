@@ -8,7 +8,7 @@ import lombok.Data;
 public class CurrencyDto {
     private int id;
     private String code;
-    private String full_name;
+    private String name;
     private String sign;
 
 }

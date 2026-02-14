@@ -17,6 +17,10 @@ public class CurrencyService {
 
     }
 
+    public static CurrencyService getInstance(){
+        return INSTANCE;
+    }
+
     public List<CurrencyDto> findAll(){
         var currenciesEntity = currencyDao.findAll();
         List<CurrencyDto> currencyDtos = new ArrayList<>();
@@ -29,6 +33,12 @@ public class CurrencyService {
     public CurrencyDto findByCode(String code){
         var currencyOptional = currencyDao.findByCode(code);
         var currency = currencyOptional.orElseThrow(() -> new CurrencyNotFoundException(code));
+        return buildDto(currency);
+    }
+
+    public CurrencyDto findById(int id){
+        var currencyOptional = currencyDao.findById(id);
+        var currency = currencyOptional.orElseThrow(() -> new CurrencyNotFoundException(id));
         return buildDto(currency);
     }
 
