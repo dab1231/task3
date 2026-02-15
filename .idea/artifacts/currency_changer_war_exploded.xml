@@ -9,6 +9,7 @@
         <element id="directory" name="lib">
           <element id="library" level="project" name="lombok" />
           <element id="library" level="project" name="sqlite-jdbc-3.51.1.0" />
+          <element id="library" level="project" name="gson-2.13.2" />
         </element>
       </element>
       <element id="javaee-facet-resources" facet="currency-changer/web/Web" />

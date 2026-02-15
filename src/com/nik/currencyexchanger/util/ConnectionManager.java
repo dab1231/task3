@@ -20,6 +20,19 @@ public class ConnectionManager {
     private static BlockingQueue<Connection> pool;
     private static List<Connection> sourceConnections;
 
+    static {
+        loadDriver();
+        initConnectionPool();
+    }
+
+    private static void loadDriver() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("SQLite JDBC driver not found", e);
+        }
+    }
+
     private static Connection open(){
         try {
             Connection connection = DriverManager.getConnection(PropertiesUtil.getProperty(URL_KEY));

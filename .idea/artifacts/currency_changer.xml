@@ -2,7 +2,12 @@
   <artifact type="war" name="currency-changer">
     <output-path>$PROJECT_DIR$/out/artifacts/currency_changer</output-path>
     <root id="archive" name="currency-changer.war">
-      <element id="artifact" artifact-name="currency-changer:Web exploded" />
+      <element id="javaee-facet-resources" facet="currency-changer/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="currency-changer" />
+        </element>
+      </element>
     </root>
   </artifact>
 </component>

@@ -7,7 +7,6 @@ import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.service.CurrencyService;
 import com.nik.currencyexchanger.util.ErrorSetter;
 import com.nik.currencyexchanger.util.StatusSetter;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
