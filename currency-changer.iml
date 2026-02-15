@@ -23,5 +23,6 @@
     <orderEntry type="library" name="lombok" level="project" />
     <orderEntry type="library" name="sqlite-jdbc-3.51.1.0" level="project" />
     <orderEntry type="library" name="servlet-api" level="project" />
+    <orderEntry type="library" name="gson-2.13.2" level="project" />
   </component>
 </module>
