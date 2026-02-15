@@ -1,7 +1,6 @@
 package com.nik.currencyexchanger.servlet;
 
 import com.google.gson.Gson;
-import com.nik.currencyexchanger.dto.CurrencyDto;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.service.CurrencyService;

@@ -1,14 +1,12 @@
 package com.nik.currencyexchanger.servlet;
 
 import com.google.gson.Gson;
-import com.nik.currencyexchanger.dto.ExchangeRateDto;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateAlreadyExistsException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
 import com.nik.currencyexchanger.util.ErrorSetter;
 import com.nik.currencyexchanger.util.StatusSetter;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

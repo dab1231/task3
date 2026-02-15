@@ -1,6 +1,5 @@
 package com.nik.currencyexchanger.dto;
 
-import com.nik.currencyexchanger.entity.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
