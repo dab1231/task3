@@ -7,6 +7,7 @@ import com.nik.currencyexchanger.exception.ExchangeRateAlreadyExistsException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
 import com.nik.currencyexchanger.util.ErrorSetter;
 import com.nik.currencyexchanger.util.StatusSetter;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+@WebServlet("/exchangeRates")
 public class ExchangeRatesServlet extends HttpServlet {
 
     private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
