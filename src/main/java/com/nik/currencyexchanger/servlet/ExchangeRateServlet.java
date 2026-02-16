@@ -54,13 +54,15 @@ public class ExchangeRateServlet extends HttpServlet {
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            var rateString = req.getParameter("rate");
-
-            if(rateString == null || rateString.isBlank()){
+            var reader = req.getReader();
+            var line = reader.readLine();
+            var rateString = line.substring(5);
+            if(rateString.isBlank()){
                 ErrorSetter.setError(resp, 400, "The required form field is missing.");
                 return;
             }
             BigDecimal rate = new BigDecimal(rateString);
+
 
             var pathInfo = req.getPathInfo();
             if(pathInfo == null){
