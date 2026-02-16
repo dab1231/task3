@@ -2,10 +2,13 @@
   <artifact type="war" name="currency-changer">
     <output-path>$PROJECT_DIR$/out/artifacts/currency_changer</output-path>
     <root id="archive" name="currency-changer.war">
-      <element id="javaee-facet-resources" facet="currency-changer/web/Web" />
+      <element id="artifact" artifact-name="currency-changer:Web exploded" />
       <element id="directory" name="WEB-INF">
-        <element id="directory" name="classes">
-          <element id="module-output" name="currency-changer" />
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="gson-2.13.2" />
+          <element id="library" level="project" name="lombok" />
+          <element id="library" level="project" name="servlet-api" />
+          <element id="library" level="project" name="sqlite-jdbc-3.51.1.0" />
         </element>
       </element>
     </root>

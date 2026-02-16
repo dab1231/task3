@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-@WebServlet("exchangeRate/*")
+@WebServlet("/exchangeRate/*")
 public class ExchangeRateServlet extends HttpServlet {
 
     private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
@@ -54,6 +54,14 @@ public class ExchangeRateServlet extends HttpServlet {
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            var rateString = req.getParameter("rate");
+
+            if(rateString == null || rateString.isBlank()){
+                ErrorSetter.setError(resp, 400, "The required form field is missing.");
+                return;
+            }
+            BigDecimal rate = new BigDecimal(rateString);
+
             var pathInfo = req.getPathInfo();
             if(pathInfo == null){
                 ErrorSetter.setError(resp, 400, "Currency pair is missing");
@@ -67,14 +75,7 @@ public class ExchangeRateServlet extends HttpServlet {
             }
             var targetCode = baseAndTargetCode.substring(3);
             var baseCode = baseAndTargetCode.substring(0, 3);
-            var rateString = req.getParameter("rate");
 
-            if(rateString == null || rateString.isBlank()){
-                ErrorSetter.setError(resp, 400, "The required form field is missing.");
-                return;
-            }
-
-            BigDecimal rate = new BigDecimal(rateString);
             var exchangeRateDto = exchangeRateService.updateExchangeRate(baseCode, targetCode, rate);
             StatusSetter.setHeadersAndStatus(resp, 200);
             var jsonString = gson.toJson(exchangeRateDto);
