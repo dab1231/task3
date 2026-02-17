@@ -6,6 +6,7 @@ import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
 import com.nik.currencyexchanger.util.ErrorSetter;
 import com.nik.currencyexchanger.util.StatusSetter;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +53,7 @@ public class ExchangeRateServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         if (req.getMethod().equalsIgnoreCase("PATCH")) {
             doPatch(req, resp);
         } else {
