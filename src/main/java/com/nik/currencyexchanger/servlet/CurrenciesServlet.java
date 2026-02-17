@@ -55,7 +55,7 @@ public class CurrenciesServlet extends HttpServlet {
                     .write(jsonString);
         }
         catch (CurrencyAlreadyExistsException e) {
-            ErrorSetter.setError(resp, 409, "Curency with this code already exists");
+            ErrorSetter.setError(resp, 409, "Currency with this code already exists");
         }
         catch (DataBaseException e){
             ErrorSetter.setError(resp, 500, "DB error");
