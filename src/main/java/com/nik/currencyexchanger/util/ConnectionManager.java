@@ -15,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
 public class ConnectionManager {
 
     private static final int DEFAULT_POOL_SIZE = 5;
-    private static final String URL_KEY = "db.url";
+    private static final String DB_PATH = "db.path";
     private static final String POOL_SIZE = "db.pool.size";
     private static BlockingQueue<Connection> pool;
     private static List<Connection> sourceConnections;
@@ -35,7 +35,7 @@ public class ConnectionManager {
 
     private static Connection open(){
         try {
-            Connection connection = DriverManager.getConnection(PropertiesUtil.getProperty(URL_KEY));
+            Connection connection = DriverManager.getConnection(PropertiesUtil.getProperty(DB_PATH));
             try(var statement = connection.createStatement()){
                 statement.execute("PRAGMA foreign_keys = ON");
             }
