@@ -30,22 +30,13 @@ public class ErrorFilter implements Filter {
         catch (DataBaseException e) {
             sendError( httpResp, 500, "DB error");
         }
-        catch (CurrencyNotFoundException e){
+        catch (CurrencyNotFoundException | ExchangeRateNotFoundException e){
             sendError(httpResp,404, e.getMessage());
         }
-        catch (CurrencyAlreadyExistsException e) {
+        catch (CurrencyAlreadyExistsException | ExchangeRateAlreadyExistsException e) {
             sendError(httpResp, 409, e.getMessage());
         }
-        catch (NumberFormatException e) {
-            sendError(httpResp, 400, e.getMessage());
-        }
-        catch (ExchangeRateAlreadyExistsException e) {
-            sendError(httpResp, 409, e.getMessage());
-        }
-        catch (ExchangeRateNotFoundException e){
-            sendError(httpResp, 404, e.getMessage());
-        }
-        catch (ValidationException e){
+        catch (NumberFormatException | ValidationException e) {
             sendError(httpResp, 400, e.getMessage());
         }
     }

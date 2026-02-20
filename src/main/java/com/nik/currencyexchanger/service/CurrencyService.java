@@ -52,7 +52,7 @@ public class CurrencyService {
         return new CurrencyDto(
                 currency.getId(),
                 currency.getCode(),
-                currency.getFull_name(),
+                currency.getFullName(),
                 currency.getSign()
         );
     }
