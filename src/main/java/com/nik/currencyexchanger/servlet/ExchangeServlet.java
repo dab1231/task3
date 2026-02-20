@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
+import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
-import com.nik.currencyexchanger.util.ErrorSetter;
-import com.nik.currencyexchanger.util.StatusSetter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,20 +23,19 @@ public class ExchangeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException, NumberFormatException, DataBaseException, CurrencyNotFoundException, ExchangeRateNotFoundException {
+            throws IOException, NumberFormatException, DataBaseException, CurrencyNotFoundException, ExchangeRateNotFoundException, ValidationException {
 
         var baseCode = req.getParameter("from");
         var targetCode = req.getParameter("to");
         var amountString = req.getParameter("amount");
         if (baseCode == null || targetCode == null || amountString == null
                 || baseCode.isBlank() || targetCode.isBlank() || amountString.isBlank()) {
-            ErrorSetter.setError(resp, 400, "Required parameter is missing");
-            return;
+            throw new ValidationException("Required parameter is missing");
         }
 
         BigDecimal amount = new BigDecimal(amountString);
         var exchangeDto = exchangeRateService.calculateExchange(baseCode, targetCode, amount);
-        StatusSetter.setHeadersAndStatus(resp, 200);
+        resp.setStatus(200);
         var jsonString = gson.toJson(exchangeDto);
         resp.getWriter()
                 .write(jsonString);

@@ -3,15 +3,14 @@ package com.nik.currencyexchanger.servlet;
 import com.google.gson.Gson;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
+import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.CurrencyService;
-import com.nik.currencyexchanger.util.StatusSetter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.Map;
 
 
 @WebServlet("/currency/*")
@@ -22,21 +21,18 @@ public class CurrencyServlet extends HttpServlet {
 
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, DataBaseException, CurrencyNotFoundException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, DataBaseException, CurrencyNotFoundException, ValidationException {
         var pathInfo = req.getPathInfo();
 
         if (pathInfo == null || pathInfo.length() <= 1) {
-            StatusSetter.setHeadersAndStatus(resp, 400);
-            var errorJson = gson.toJson(Map.of("message", "Currency code is missing from the address"));
-            resp.getWriter()
-                    .write(errorJson);
-            return;
+            throw new ValidationException("Currency code is missing");
         }
 
         var code = pathInfo.substring(1);
         var currencyDto = currencyService.getCurrencyByCode(code);
 
-        StatusSetter.setHeadersAndStatus(resp, 200);
+        resp.setStatus(200);
         var jsonString = gson.toJson(currencyDto);
         resp.getWriter()
                 .write(jsonString);

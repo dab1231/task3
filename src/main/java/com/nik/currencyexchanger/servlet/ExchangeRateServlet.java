@@ -3,9 +3,8 @@ package com.nik.currencyexchanger.servlet;
 import com.google.gson.Gson;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
+import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
-import com.nik.currencyexchanger.util.ErrorSetter;
-import com.nik.currencyexchanger.util.StatusSetter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,25 +22,23 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException, CurrencyNotFoundException, DataBaseException {
+            throws IOException, CurrencyNotFoundException, DataBaseException, ValidationException {
 
         var pathInfo = req.getPathInfo();
 
         if (pathInfo == null) {
-            ErrorSetter.setError(resp, 400, "Currency pair is missing");
-            return;
+            throw new ValidationException("Currency pair is missing");
         }
         var baseAndTargetCode = pathInfo.substring(1);
 
         if (baseAndTargetCode.length() != 6) {
-            ErrorSetter.setError(resp, 400, "Currency codes for the pair are missing from the address ");
-            return;
+            throw new ValidationException("Currency codes for the pair are missing from the address");
         }
 
         var targetCode = baseAndTargetCode.substring(3);
         var baseCode = baseAndTargetCode.substring(0, 3);
         var exchangeRateDto = exchangeRateService.getExchangeRate(baseCode, targetCode);
-        StatusSetter.setHeadersAndStatus(resp, 200);
+        resp.setStatus(200);
         var jsonString = gson.toJson(exchangeRateDto);
         resp.getWriter()
                 .write(jsonString);
@@ -58,13 +55,12 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException, NumberFormatException, CurrencyNotFoundException, DataBaseException {
+            throws IOException, NumberFormatException, CurrencyNotFoundException, DataBaseException, ValidationException {
 
         var reader = req.getReader();
         var line = reader.readLine();
         if (line == null) {
-            ErrorSetter.setError(resp, 400, "The required form field is missing.");
-            return;
+            throw new ValidationException("The required form field is missing.");
         }
         var rateString = line.substring(5);
 
@@ -73,20 +69,18 @@ public class ExchangeRateServlet extends HttpServlet {
 
         var pathInfo = req.getPathInfo();
         if (pathInfo == null) {
-            ErrorSetter.setError(resp, 400, "Currency pair is missing");
-            return;
+            throw new ValidationException("Currency pair is missing");
         }
         var baseAndTargetCode = pathInfo.substring(1);
 
         if (baseAndTargetCode.length() != 6) {
-            ErrorSetter.setError(resp, 400, "Currency codes for the pair are missing from the address");
-            return;
+            throw new ValidationException("Currency codes for the pair are missing from the address.");
         }
         var targetCode = baseAndTargetCode.substring(3);
         var baseCode = baseAndTargetCode.substring(0, 3);
 
         var exchangeRateDto = exchangeRateService.updateExchangeRate(baseCode, targetCode, rate);
-        StatusSetter.setHeadersAndStatus(resp, 200);
+        resp.setStatus(200);
         var jsonString = gson.toJson(exchangeRateDto);
         resp.getWriter()
                 .write(jsonString);

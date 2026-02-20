@@ -3,9 +3,8 @@ package com.nik.currencyexchanger.servlet;
 import com.google.gson.Gson;
 import com.nik.currencyexchanger.exception.CurrencyAlreadyExistsException;
 import com.nik.currencyexchanger.exception.DataBaseException;
+import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.CurrencyService;
-import com.nik.currencyexchanger.util.ErrorSetter;
-import com.nik.currencyexchanger.util.StatusSetter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,25 +24,25 @@ public class CurrenciesServlet extends HttpServlet {
         var currenciesDto = currencyService.getAllCurrencies();
         String jsonString = gson.toJson(currenciesDto);
 
-        StatusSetter.setHeadersAndStatus(resp, 200);
+        resp.setStatus(200);
         resp.getWriter()
                 .write(jsonString);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, CurrencyAlreadyExistsException, DataBaseException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, CurrencyAlreadyExistsException, DataBaseException, ValidationException {
         var name = req.getParameter("name");
         var code = req.getParameter("code");
         var sign = req.getParameter("sign");
 
         if (name == null || code == null || sign == null
                 || name.isBlank() || code.isBlank() || sign.isBlank() || sign.length() > 3) {
-            ErrorSetter.setError(resp, 400, "The required form field is missing.");
-            return;
+            throw new ValidationException("The required form field is missing.");
         }
 
         var currency = currencyService.createCurrency(name, code, sign);
-        StatusSetter.setHeadersAndStatus(resp, 201);
+        resp.setStatus(201);
         var jsonString = gson.toJson(currency);
         resp.getWriter()
                 .write(jsonString);

@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateAlreadyExistsException;
+import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
-import com.nik.currencyexchanger.util.ErrorSetter;
-import com.nik.currencyexchanger.util.StatusSetter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,7 @@ public class ExchangeRatesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, DataBaseException {
         var exchangeRatesDto = exchangeRateService.getAllExchangeRates();
-        StatusSetter.setHeadersAndStatus(resp, 200);
+        resp.setStatus(200);
         var jsonString = gson.toJson(exchangeRatesDto);
         resp.getWriter()
                 .write(jsonString);
@@ -32,7 +31,7 @@ public class ExchangeRatesServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException, ExchangeRateAlreadyExistsException, CurrencyNotFoundException, DataBaseException, NumberFormatException {
+            throws IOException, ExchangeRateAlreadyExistsException, CurrencyNotFoundException, DataBaseException, NumberFormatException, ValidationException {
 
         var baseCurrencyCode = req.getParameter("baseCurrencyCode");
         var targetCurrencyCode = req.getParameter("targetCurrencyCode");
@@ -40,14 +39,13 @@ public class ExchangeRatesServlet extends HttpServlet {
 
         if (baseCurrencyCode == null || targetCurrencyCode == null || rateString == null
                 || baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank() || rateString.isBlank()) {
-            ErrorSetter.setError(resp, 400, "The required form field is missing");
-            return;
+            throw new ValidationException("The required form field is missing.");
         }
 
         BigDecimal rate = new BigDecimal(rateString);
         var exchangeRateDto = exchangeRateService
                 .createExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
-        StatusSetter.setHeadersAndStatus(resp, 201);
+        resp.setStatus(201);
         var jsonString = gson.toJson(exchangeRateDto);
         resp.getWriter()
                 .write(jsonString);

@@ -7,7 +7,6 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @WebFilter("/*")
@@ -17,8 +16,6 @@ public class ErrorFilter implements Filter {
 
     private void sendError(HttpServletResponse response, int status, String message) throws IOException {
         response.setStatus(status);
-        response.setContentType("application/json");
-        response.setCharacterEncoding(StandardCharsets.UTF_8);
         String errorJson = gson.toJson(Map.of("message", message));
         response.getWriter()
                 .write(errorJson);
@@ -34,19 +31,22 @@ public class ErrorFilter implements Filter {
             sendError( httpResp, 500, "DB error");
         }
         catch (CurrencyNotFoundException e){
-            sendError(httpResp,404, "Currency not found");
+            sendError(httpResp,404, e.getMessage());
         }
         catch (CurrencyAlreadyExistsException e) {
-            sendError(httpResp, 409, "Currency with this code already exists");
+            sendError(httpResp, 409, e.getMessage());
         }
         catch (NumberFormatException e) {
-            sendError(httpResp, 400, "Invalid rate format");
+            sendError(httpResp, 400, e.getMessage());
         }
         catch (ExchangeRateAlreadyExistsException e) {
-            sendError(httpResp, 409, "Currency pair with this code already exists. ");
+            sendError(httpResp, 409, e.getMessage());
         }
         catch (ExchangeRateNotFoundException e){
             sendError(httpResp, 404, e.getMessage());
+        }
+        catch (ValidationException e){
+            sendError(httpResp, 400, e.getMessage());
         }
     }
 }
