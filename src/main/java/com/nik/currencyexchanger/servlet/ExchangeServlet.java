@@ -41,7 +41,7 @@ public class ExchangeServlet extends HttpServlet {
             resp.getWriter()
                     .write(jsonString);
         } catch (NumberFormatException e) {
-            ErrorSetter.setError(resp, 400, "Invalid rate format");
+            ErrorSetter.setError(resp, 400, "Invalid amount format");
         } catch (DataBaseException e){
             ErrorSetter.setError(resp, 500, "DB error");
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e){

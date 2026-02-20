@@ -29,7 +29,7 @@ public class ExchangeRateDao {
     private static final String SELECT_BY_CURRENCIES_ID_SQL = """
             SELECT id, base_currency_id, target_currency_id, rate
             FROM ExchangeRates
-            WHERE (base_currency_id = ? AND target_currency_id = ?) OR (target_currency_id = ? AND base_currency_id = ?) 
+            WHERE base_currency_id = ? AND target_currency_id = ? 
             """;
 
     private static final String INSERT_SQL = """
