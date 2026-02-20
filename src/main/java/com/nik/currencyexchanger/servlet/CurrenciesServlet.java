@@ -21,44 +21,32 @@ public class CurrenciesServlet extends HttpServlet {
     private final Gson gson = new Gson();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            var currenciesDto = currencyService.getAllCurrencies();
-            String jsonString = gson.toJson(currenciesDto);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, DataBaseException {
+        var currenciesDto = currencyService.getAllCurrencies();
+        String jsonString = gson.toJson(currenciesDto);
 
-            StatusSetter.setHeadersAndStatus(resp, 200);
-            resp.getWriter()
+        StatusSetter.setHeadersAndStatus(resp, 200);
+        resp.getWriter()
                 .write(jsonString);
-
-        } catch (DataBaseException e) {
-            ErrorSetter.setError(resp, 500, "DB error");
-        }
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            var name = req.getParameter("name");
-            var code = req.getParameter("code");
-            var sign = req.getParameter("sign");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, CurrencyAlreadyExistsException, DataBaseException {
+        var name = req.getParameter("name");
+        var code = req.getParameter("code");
+        var sign = req.getParameter("sign");
 
-            if(name == null || code == null || sign == null
-                    || name.isBlank() || code.isBlank() || sign.isBlank() || sign.length() > 3){
-                ErrorSetter.setError(resp, 400, "The required form field is missing.");
-                return;
-            }
+        if (name == null || code == null || sign == null
+                || name.isBlank() || code.isBlank() || sign.isBlank() || sign.length() > 3) {
+            ErrorSetter.setError(resp, 400, "The required form field is missing.");
+            return;
+        }
 
-            var currency = currencyService.createCurrency(name, code, sign);
-            StatusSetter.setHeadersAndStatus(resp, 201);
-            var jsonString = gson.toJson(currency);
-            resp.getWriter()
-                    .write(jsonString);
-        }
-        catch (CurrencyAlreadyExistsException e) {
-            ErrorSetter.setError(resp, 409, "Currency with this code already exists");
-        }
-        catch (DataBaseException e){
-            ErrorSetter.setError(resp, 500, "DB error");
-        }
+        var currency = currencyService.createCurrency(name, code, sign);
+        StatusSetter.setHeadersAndStatus(resp, 201);
+        var jsonString = gson.toJson(currency);
+        resp.getWriter()
+                .write(jsonString);
+
     }
 }

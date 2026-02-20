@@ -22,51 +22,34 @@ public class ExchangeRatesServlet extends HttpServlet {
     private final Gson gson = new Gson();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            var exchangeRatesDto = exchangeRateService.getAllExchangeRates();
-            StatusSetter.setHeadersAndStatus(resp, 200);
-            var jsonString = gson.toJson(exchangeRatesDto);
-            resp.getWriter()
-                    .write(jsonString);
-        } catch (DataBaseException e) {
-            ErrorSetter.setError(resp, 500, "DB error");
-        }
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, DataBaseException {
+        var exchangeRatesDto = exchangeRateService.getAllExchangeRates();
+        StatusSetter.setHeadersAndStatus(resp, 200);
+        var jsonString = gson.toJson(exchangeRatesDto);
+        resp.getWriter()
+                .write(jsonString);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            var baseCurrencyCode = req.getParameter("baseCurrencyCode");
-            var targetCurrencyCode = req.getParameter("targetCurrencyCode");
-            var rateString = req.getParameter("rate");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, ExchangeRateAlreadyExistsException, CurrencyNotFoundException, DataBaseException, NumberFormatException {
 
-            if(baseCurrencyCode == null || targetCurrencyCode == null || rateString == null
-                || baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank() || rateString.isBlank()){
-                ErrorSetter.setError(resp, 400, "The required form field is missing");
-                return;
-            }
+        var baseCurrencyCode = req.getParameter("baseCurrencyCode");
+        var targetCurrencyCode = req.getParameter("targetCurrencyCode");
+        var rateString = req.getParameter("rate");
 
-            BigDecimal rate = new BigDecimal(rateString);
-            var exchangeRateDto = exchangeRateService
-                    .createExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
-            StatusSetter.setHeadersAndStatus(resp, 201);
-            var jsonString = gson.toJson(exchangeRateDto);
-            resp.getWriter()
-                    .write(jsonString);
+        if (baseCurrencyCode == null || targetCurrencyCode == null || rateString == null
+                || baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank() || rateString.isBlank()) {
+            ErrorSetter.setError(resp, 400, "The required form field is missing");
+            return;
         }
-        catch (ExchangeRateAlreadyExistsException e) {
-            ErrorSetter.setError(resp, 409, "Currency pair with this code already exists. ");
-        }
-        catch (CurrencyNotFoundException e){
-            ErrorSetter.setError(resp, 404,
-                    "One (or both) currencies in the currency pair does not exist in the database.");
-        }
-        catch (DataBaseException e){
-            ErrorSetter.setError(resp, 500, "DB error");
-        }
-        catch (NumberFormatException e){
-            ErrorSetter.setError(resp, 400, "Invalid rate format");
-        }
+
+        BigDecimal rate = new BigDecimal(rateString);
+        var exchangeRateDto = exchangeRateService
+                .createExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
+        StatusSetter.setHeadersAndStatus(resp, 201);
+        var jsonString = gson.toJson(exchangeRateDto);
+        resp.getWriter()
+                .write(jsonString);
     }
 }

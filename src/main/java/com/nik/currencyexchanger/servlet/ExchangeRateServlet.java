@@ -22,35 +22,29 @@ public class ExchangeRateServlet extends HttpServlet {
     private final Gson gson = new Gson();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            var pathInfo = req.getPathInfo();
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, CurrencyNotFoundException, DataBaseException {
 
-            if(pathInfo == null){
-                ErrorSetter.setError(resp, 400, "Currency pair is missing");
-                return;
-            }
-            var baseAndTargetCode = pathInfo.substring(1);
+        var pathInfo = req.getPathInfo();
 
-            if(baseAndTargetCode.length() != 6){
-                ErrorSetter.setError(resp, 400, "Currency codes for the pair are missing from the address ");
-                return;
-            }
+        if (pathInfo == null) {
+            ErrorSetter.setError(resp, 400, "Currency pair is missing");
+            return;
+        }
+        var baseAndTargetCode = pathInfo.substring(1);
 
-            var targetCode = baseAndTargetCode.substring(3);
-            var baseCode = baseAndTargetCode.substring(0, 3);
-            var exchangeRateDto = exchangeRateService.getExchangeRate(baseCode, targetCode);
-            StatusSetter.setHeadersAndStatus(resp, 200);
-            var jsonString = gson.toJson(exchangeRateDto);
-            resp.getWriter()
-                    .write(jsonString);
+        if (baseAndTargetCode.length() != 6) {
+            ErrorSetter.setError(resp, 400, "Currency codes for the pair are missing from the address ");
+            return;
         }
-        catch (CurrencyNotFoundException e) {
-            ErrorSetter.setError(resp, 404, "One (or both) currencies in the currency pair does not exist in the database.");
-        }
-        catch (DataBaseException e){
-            ErrorSetter.setError(resp, 500, "DB error");
-        }
+
+        var targetCode = baseAndTargetCode.substring(3);
+        var baseCode = baseAndTargetCode.substring(0, 3);
+        var exchangeRateDto = exchangeRateService.getExchangeRate(baseCode, targetCode);
+        StatusSetter.setHeadersAndStatus(resp, 200);
+        var jsonString = gson.toJson(exchangeRateDto);
+        resp.getWriter()
+                .write(jsonString);
     }
 
     @Override
@@ -63,44 +57,38 @@ public class ExchangeRateServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            var reader = req.getReader();
-            var line = reader.readLine();
-            if(line == null){
-                ErrorSetter.setError(resp, 400, "The required form field is missing.");
-                return;
-            }
-            var rateString = line.substring(5);
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, NumberFormatException, CurrencyNotFoundException, DataBaseException {
 
-            BigDecimal rate = new BigDecimal(rateString);
-
-
-            var pathInfo = req.getPathInfo();
-            if(pathInfo == null){
-                ErrorSetter.setError(resp, 400, "Currency pair is missing");
-                return;
-            }
-            var baseAndTargetCode = pathInfo.substring(1);
-
-            if(baseAndTargetCode.length() != 6){
-                ErrorSetter.setError(resp, 400, "Currency codes for the pair are missing from the address");
-                return;
-            }
-            var targetCode = baseAndTargetCode.substring(3);
-            var baseCode = baseAndTargetCode.substring(0, 3);
-
-            var exchangeRateDto = exchangeRateService.updateExchangeRate(baseCode, targetCode, rate);
-            StatusSetter.setHeadersAndStatus(resp, 200);
-            var jsonString = gson.toJson(exchangeRateDto);
-            resp.getWriter()
-                    .write(jsonString);
-        } catch (NumberFormatException e) {
-            ErrorSetter.setError(resp, 400, "Invalid rate format");
-        } catch (CurrencyNotFoundException e){
-            ErrorSetter.setError(resp, 404, "One (or both) currencies in the currency pair does not exist in the database.");
-        } catch (DataBaseException e){
-            ErrorSetter.setError(resp, 500, "DB error");
+        var reader = req.getReader();
+        var line = reader.readLine();
+        if (line == null) {
+            ErrorSetter.setError(resp, 400, "The required form field is missing.");
+            return;
         }
+        var rateString = line.substring(5);
+
+        BigDecimal rate = new BigDecimal(rateString);
+
+
+        var pathInfo = req.getPathInfo();
+        if (pathInfo == null) {
+            ErrorSetter.setError(resp, 400, "Currency pair is missing");
+            return;
+        }
+        var baseAndTargetCode = pathInfo.substring(1);
+
+        if (baseAndTargetCode.length() != 6) {
+            ErrorSetter.setError(resp, 400, "Currency codes for the pair are missing from the address");
+            return;
+        }
+        var targetCode = baseAndTargetCode.substring(3);
+        var baseCode = baseAndTargetCode.substring(0, 3);
+
+        var exchangeRateDto = exchangeRateService.updateExchangeRate(baseCode, targetCode, rate);
+        StatusSetter.setHeadersAndStatus(resp, 200);
+        var jsonString = gson.toJson(exchangeRateDto);
+        resp.getWriter()
+                .write(jsonString);
     }
 }
