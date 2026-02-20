@@ -1,4 +1,6 @@
-package com.nik.currencyexchanger.dto;
+package com.nik.currencyexchanger.dto.response;
+
+import com.nik.currencyexchanger.dto.CurrencyDto;
 
 import java.math.BigDecimal;
 

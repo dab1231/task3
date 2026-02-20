@@ -2,7 +2,7 @@ package com.nik.currencyexchanger.service;
 
 import com.nik.currencyexchanger.dao.ExchangeRateDao;
 import com.nik.currencyexchanger.dto.ExchangeDto;
-import com.nik.currencyexchanger.dto.ExchangeRateDto;
+import com.nik.currencyexchanger.dto.response.ExchangeRateDto;
 import com.nik.currencyexchanger.entity.ExchangeRate;
 import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
 
@@ -37,8 +37,8 @@ public class ExchangeRateService {
     }
 
     public ExchangeRateDto getExchangeRate(String baseCode, String targetCode){
-        var baseId = currencyService.getCurrencyByCode(baseCode).getId();
-        var targetId = currencyService.getCurrencyByCode(targetCode).getId();
+        var baseId = currencyService.getCurrencyByCode(baseCode).id();
+        var targetId = currencyService.getCurrencyByCode(targetCode).id();
 
         var exchangeRate = exchangeRateDao.findByCurrenciesId(baseId, targetId)
                 .orElseThrow(() -> new ExchangeRateNotFoundException());
@@ -46,8 +46,8 @@ public class ExchangeRateService {
     }
 
     public ExchangeDto calculateExchange(String baseCode, String targetCode, BigDecimal amount){
-        var baseCurrencyId = currencyService.getCurrencyByCode(baseCode).getId();
-        var targetCurrencyId = currencyService.getCurrencyByCode(targetCode).getId();
+        var baseCurrencyId = currencyService.getCurrencyByCode(baseCode).id();
+        var targetCurrencyId = currencyService.getCurrencyByCode(targetCode).id();
         var exchangeRateOptional = exchangeRateDao.findByCurrenciesId(baseCurrencyId, targetCurrencyId);
 
         if(exchangeRateOptional.isPresent()){
@@ -71,7 +71,7 @@ public class ExchangeRateService {
             return buildDto(exchangeRate, amount, convertedAmount);
         }
         else{
-            var usdId = currencyService.getCurrencyByCode("USD").getId();
+            var usdId = currencyService.getCurrencyByCode("USD").id();
             var usdToBase = exchangeRateDao.findByCurrenciesId(usdId, baseCurrencyId)
                     .orElseThrow(() -> new ExchangeRateNotFoundException());
             var usdToTarget = exchangeRateDao.findByCurrenciesId(usdId, targetCurrencyId)
@@ -92,16 +92,16 @@ public class ExchangeRateService {
     }
 
     public ExchangeRateDto createExchangeRate(String baseCode, String targetCode, BigDecimal rate){
-        var baseId = currencyService.getCurrencyByCode(baseCode).getId();
-        var targetId = currencyService.getCurrencyByCode(targetCode).getId();
+        var baseId = currencyService.getCurrencyByCode(baseCode).id();
+        var targetId = currencyService.getCurrencyByCode(targetCode).id();
 
         var exchangeRate = exchangeRateDao.save(baseId, targetId, rate);
         return buildDto(exchangeRate);
     }
 
     public ExchangeRateDto updateExchangeRate(String baseCode, String targetCode, BigDecimal rate){
-        var baseId = currencyService.getCurrencyByCode(baseCode).getId();
-        var targetId = currencyService.getCurrencyByCode(targetCode).getId();
+        var baseId = currencyService.getCurrencyByCode(baseCode).id();
+        var targetId = currencyService.getCurrencyByCode(targetCode).id();
         var exchangeRate = exchangeRateDao.update(baseId, targetId, rate)
                 .orElseThrow(() -> new ExchangeRateNotFoundException());
         return buildDto(exchangeRate);

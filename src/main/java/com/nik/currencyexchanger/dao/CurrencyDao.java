@@ -69,7 +69,7 @@ public class CurrencyDao {
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, currency.getCode());
-            preparedStatement.setString(2, currency.getFull_name());
+            preparedStatement.setString(2, currency.getFullName());
             preparedStatement.setString(3, currency.getSign());
             preparedStatement.executeUpdate();
 
@@ -131,7 +131,7 @@ public class CurrencyDao {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setString(1, currency.getCode());
-            preparedStatement.setString(2, currency.getFull_name());
+            preparedStatement.setString(2, currency.getFullName());
             preparedStatement.setString(3, currency.getSign());
             preparedStatement.setInt(4, currency.getId());
 
