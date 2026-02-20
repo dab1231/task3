@@ -43,7 +43,7 @@ public class CurrenciesServlet extends HttpServlet {
             var sign = req.getParameter("sign");
 
             if(name == null || code == null || sign == null
-                    || name.isBlank() || code.isBlank() || sign.isBlank()){
+                    || name.isBlank() || code.isBlank() || sign.isBlank() || sign.length() > 3){
                 ErrorSetter.setError(resp, 400, "The required form field is missing.");
                 return;
             }
