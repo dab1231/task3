@@ -53,7 +53,21 @@ public class ExchangeRateService {
         if(exchangeRateOptional.isPresent()){
             var exchangeRate = exchangeRateOptional.get();
             var rate = exchangeRate.getRate();
-            var convertedAmount = rate.multiply(amount).setScale(2, ROUNDING_MODE);
+            var convertedAmount = rate.multiply(amount).setScale(DECIMAL_SCALE, ROUNDING_MODE);
+            return buildDto(exchangeRate, amount, convertedAmount);
+        }
+        else if (exchangeRateDao.findByCurrenciesId(targetCurrencyId, baseCurrencyId).isPresent()) {
+            var reversedExchangeRate
+                    = exchangeRateDao.findByCurrenciesId(targetCurrencyId, baseCurrencyId).get();
+            var rate = reversedExchangeRate.getRate();
+            var reversedRate = BigDecimal.ONE.divide(rate, DECIMAL_SCALE, ROUNDING_MODE);
+            var convertedAmount = reversedRate.multiply(amount).setScale(DECIMAL_SCALE, ROUNDING_MODE);
+            var exchangeRate = new ExchangeRate(
+                    0,
+                    baseCurrencyId,
+                    targetCurrencyId,
+                    reversedRate
+            );
             return buildDto(exchangeRate, amount, convertedAmount);
         }
         else{

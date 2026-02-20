@@ -17,8 +17,6 @@ import java.util.Optional;
 
 public class ExchangeRateDao {
 
-    private static final int DECIMAL_SCALE = 6;
-    private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
     private static final ExchangeRateDao INSTANCE = new ExchangeRateDao();
 
     private static final String SELECT_ALL_SQL = """
@@ -117,40 +115,17 @@ public class ExchangeRateDao {
             var preparedStatement = connection.prepareStatement(SELECT_BY_CURRENCIES_ID_SQL)) {
             preparedStatement.setInt(1,baseId);
             preparedStatement.setInt(2,targetId);
-            preparedStatement.setInt(3,targetId);
-            preparedStatement.setInt(4,baseId);
 
             var resultSet = preparedStatement.executeQuery();
 
-            ExchangeRate reverseRate = null;
+            ExchangeRate exchangeRateFromDb = null;
             if (resultSet.next()) {
-                ExchangeRate exchangeRateFromDb = buildExchangeRate(resultSet);
-                if (exchangeRateFromDb.getBaseCurrencyId() == baseId
-                        && exchangeRateFromDb.getTargetCurrencyId() == targetId) {
-                    reverseRate = exchangeRateFromDb;
-                } else {
-                    reverseRate = getReverseRate(exchangeRateFromDb);
-                }
+                exchangeRateFromDb = buildExchangeRate(resultSet);
             }
-            return Optional.ofNullable(reverseRate);
+            return Optional.ofNullable(exchangeRateFromDb);
         } catch (SQLException e) {
             throw new DataBaseException("DB error",e);
         }
-    }
-
-    private ExchangeRate getReverseRate(ExchangeRate originalExchangeRate){
-
-        var baseCurrencyId = originalExchangeRate.getBaseCurrencyId();
-        var targetCurrencyId = originalExchangeRate.getTargetCurrencyId();
-        BigDecimal originalRate = originalExchangeRate.getRate();
-        BigDecimal reverseRate = BigDecimal.ONE.divide(originalRate, DECIMAL_SCALE, ROUNDING_MODE);
-
-        ExchangeRate reversedExchangeRate = new ExchangeRate();
-        reversedExchangeRate.setRate(reverseRate);
-        reversedExchangeRate.setBaseCurrencyId(targetCurrencyId);
-        reversedExchangeRate.setTargetCurrencyId(baseCurrencyId);
-        reversedExchangeRate.setId(originalExchangeRate.getId());
-        return reversedExchangeRate;
     }
 
     private ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {
