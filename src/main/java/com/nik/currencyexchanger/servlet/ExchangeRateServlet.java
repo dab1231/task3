@@ -1,6 +1,7 @@
 package com.nik.currencyexchanger.servlet;
 
 import com.google.gson.Gson;
+import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
@@ -34,6 +35,7 @@ public class ExchangeRateServlet extends HttpServlet {
 
             if(baseAndTargetCode.length() != 6){
                 ErrorSetter.setError(resp, 400, "Currency codes for the pair are missing from the address ");
+                return;
             }
 
             var targetCode = baseAndTargetCode.substring(3);
@@ -44,8 +46,8 @@ public class ExchangeRateServlet extends HttpServlet {
             resp.getWriter()
                     .write(jsonString);
         }
-        catch (ExchangeRateNotFoundException e) {
-            ErrorSetter.setError(resp, 404, "Exchange rate for the pair not found");
+        catch (CurrencyNotFoundException e) {
+            ErrorSetter.setError(resp, 404, "One (or both) currencies in the currency pair does not exist in the database.");
         }
         catch (DataBaseException e){
             ErrorSetter.setError(resp, 500, "DB error");
