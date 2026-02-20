@@ -3,7 +3,6 @@ package com.nik.currencyexchanger.servlet;
 import com.google.gson.Gson;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
-import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
 import com.nik.currencyexchanger.util.ErrorSetter;
 import com.nik.currencyexchanger.util.StatusSetter;
@@ -68,11 +67,12 @@ public class ExchangeRateServlet extends HttpServlet {
         try {
             var reader = req.getReader();
             var line = reader.readLine();
-            var rateString = line.substring(5);
-            if(rateString.isBlank()){
+            if(line == null){
                 ErrorSetter.setError(resp, 400, "The required form field is missing.");
                 return;
             }
+            var rateString = line.substring(5);
+
             BigDecimal rate = new BigDecimal(rateString);
 
 
@@ -97,8 +97,8 @@ public class ExchangeRateServlet extends HttpServlet {
                     .write(jsonString);
         } catch (NumberFormatException e) {
             ErrorSetter.setError(resp, 400, "Invalid rate format");
-        } catch (ExchangeRateNotFoundException e){
-            ErrorSetter.setError(resp, 404, "Currency pair not found in database");
+        } catch (CurrencyNotFoundException e){
+            ErrorSetter.setError(resp, 404, "One (or both) currencies in the currency pair does not exist in the database.");
         } catch (DataBaseException e){
             ErrorSetter.setError(resp, 500, "DB error");
         }
