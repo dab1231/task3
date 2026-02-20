@@ -2,6 +2,7 @@ package com.nik.currencyexchanger.service;
 
 import com.nik.currencyexchanger.dao.CurrencyDao;
 import com.nik.currencyexchanger.dto.CurrencyDto;
+import com.nik.currencyexchanger.dto.request.CurrencyRequestDto;
 import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 
@@ -42,8 +43,8 @@ public class CurrencyService {
         return buildDto(currency);
     }
 
-    public CurrencyDto createCurrency(String name, String code, String sign){
-        Currency currencyWithoutId = new Currency(0, code, name, sign);
+    public CurrencyDto createCurrency(CurrencyRequestDto requestDto){ // todo: понять что делать с ДТО
+        Currency currencyWithoutId = new Currency(0, requestDto.code(), requestDto.name(), requestDto.sign());
         var currency = currencyDao.create(currencyWithoutId);
         return buildDto(currency);
     }

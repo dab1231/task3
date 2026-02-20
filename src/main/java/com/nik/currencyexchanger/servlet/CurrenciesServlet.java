@@ -1,6 +1,7 @@
 package com.nik.currencyexchanger.servlet;
 
 import com.google.gson.Gson;
+import com.nik.currencyexchanger.dto.request.CurrencyRequestDto;
 import com.nik.currencyexchanger.exception.CurrencyAlreadyExistsException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ValidationException;
@@ -40,8 +41,8 @@ public class CurrenciesServlet extends HttpServlet {
                 || name.isBlank() || code.isBlank() || sign.isBlank() || sign.length() > 3) {
             throw new ValidationException("The required form field is missing.");
         }
-
-        var currency = currencyService.createCurrency(name, code, sign);
+        CurrencyRequestDto requestDto = new CurrencyRequestDto(name, code, sign);
+        var currency = currencyService.createCurrency(requestDto); // TODO: разобраться с reqDTO и respDTO
         resp.setStatus(201);
         var jsonString = gson.toJson(currency);
         resp.getWriter()
