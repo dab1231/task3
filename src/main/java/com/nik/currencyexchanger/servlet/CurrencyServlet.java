@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Locale;
 
 
 @WebServlet("/currency/*")
@@ -25,11 +26,14 @@ public class CurrencyServlet extends HttpServlet {
             throws IOException, DataBaseException, CurrencyNotFoundException, ValidationException {
         var pathInfo = req.getPathInfo();
 
-        if (pathInfo == null || pathInfo.length() <= 1) {
+        if (pathInfo == null || pathInfo.length() != 4) {
             throw new ValidationException("Currency code is missing");
         }
 
         var code = pathInfo.substring(1);
+        if(!code.equals(code.toUpperCase())){
+            throw new ValidationException("Currency code must be upper case");
+        }
         var currencyDto = currencyService.getCurrencyByCode(code);
 
         resp.setStatus(200);
