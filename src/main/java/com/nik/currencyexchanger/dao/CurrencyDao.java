@@ -73,17 +73,24 @@ public class CurrencyDao {
             preparedStatement.setString(3, currency.getSign());
             preparedStatement.executeUpdate();
 
+// todo: проверить реализацию (переработать)
             var generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()){
-                currency.setId(generatedKeys.getInt(1));
+                return new Currency(
+                        generatedKeys.getInt(1),
+                        currency.getCode(),
+                        currency.getFullName(),
+                        currency.getSign()
+                );
+
             }
-            return currency;
+            throw new DataBaseException("Failed to insert currency");
         } catch (SQLException e) {
             int errorCode = e.getErrorCode();
             if(errorCode == 19 || errorCode == 2067){
                 throw new CurrencyAlreadyExistsException(currency.getCode());
             }
-            throw new DataBaseException("Failed to insert currency",e);
+            throw new DataBaseException("Failed to insert currency");
         }
     }
 

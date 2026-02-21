@@ -7,7 +7,6 @@ import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
 import com.nik.currencyexchanger.util.ConnectionManager;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -66,7 +65,7 @@ public class ExchangeRateDao {
         }
     }
 
-    public ExchangeRate save(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
+    public ExchangeRate create(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setInt(1, baseCurrencyId);

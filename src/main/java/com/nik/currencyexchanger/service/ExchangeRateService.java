@@ -95,7 +95,7 @@ public class ExchangeRateService {
         var baseId = currencyService.getCurrencyByCode(baseCode).id();
         var targetId = currencyService.getCurrencyByCode(targetCode).id();
 
-        var exchangeRate = exchangeRateDao.save(baseId, targetId, rate);
+        var exchangeRate = exchangeRateDao.create(baseId, targetId, rate);
         return buildDto(exchangeRate);
     }
 
