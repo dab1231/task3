@@ -1,6 +1,7 @@
 package com.nik.currencyexchanger.servlet;
 
 import com.google.gson.Gson;
+import com.nik.currencyexchanger.dto.request.ExchangeRateRequestDto;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ValidationException;
@@ -79,7 +80,8 @@ public class ExchangeRateServlet extends HttpServlet {
         var targetCode = baseAndTargetCode.substring(3);
         var baseCode = baseAndTargetCode.substring(0, 3);
 
-        var exchangeRateDto = exchangeRateService.updateExchangeRate(baseCode, targetCode, rate);
+        ExchangeRateRequestDto requestDto = new ExchangeRateRequestDto(baseCode, targetCode, rate);
+        var exchangeRateDto = exchangeRateService.updateExchangeRate(requestDto);
         resp.setStatus(200);
         var jsonString = gson.toJson(exchangeRateDto);
         resp.getWriter()

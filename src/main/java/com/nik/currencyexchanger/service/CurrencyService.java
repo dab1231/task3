@@ -1,7 +1,7 @@
 package com.nik.currencyexchanger.service;
 
 import com.nik.currencyexchanger.dao.CurrencyDao;
-import com.nik.currencyexchanger.dto.response.CurrencyDto;
+import com.nik.currencyexchanger.dto.response.CurrencyResponseDto;
 import com.nik.currencyexchanger.dto.request.CurrencyRequestDto;
 import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
@@ -22,34 +22,34 @@ public class CurrencyService {
         return INSTANCE;
     }
 
-    public List<CurrencyDto> getAllCurrencies(){
+    public List<CurrencyResponseDto> getAllCurrencies(){
         var currenciesEntity = currencyDao.findAll();
-        List<CurrencyDto> currencyDtos = new ArrayList<>();
+        List<CurrencyResponseDto> currencyDtos = new ArrayList<>();
         for(Currency currency : currenciesEntity){
             currencyDtos.add(buildDto(currency));
         }
         return currencyDtos;
     }
 
-    public CurrencyDto getCurrencyByCode(String code){
+    public CurrencyResponseDto getCurrencyByCode(String code){
         var currencyOptional = currencyDao.findByCode(code);
         var currency = currencyOptional.orElseThrow(() -> new CurrencyNotFoundException(code));
         return buildDto(currency);
     }
 
-    public CurrencyDto getCurrencyById(int id){
+    public CurrencyResponseDto getCurrencyById(int id){
         var currencyOptional = currencyDao.findById(id);
         var currency = currencyOptional.orElseThrow(() -> new CurrencyNotFoundException(id));
         return buildDto(currency);
     }
 
-    public CurrencyDto createCurrency(CurrencyRequestDto requestDto){
+    public CurrencyResponseDto createCurrency(CurrencyRequestDto requestDto){
         var currency = currencyDao.create(requestDto);
         return buildDto(currency);
     }
 
-    private CurrencyDto buildDto(Currency currency){
-        return new CurrencyDto(
+    private CurrencyResponseDto buildDto(Currency currency){
+        return new CurrencyResponseDto(
                 currency.getId(),
                 currency.getCode(),
                 currency.getFullName(),
