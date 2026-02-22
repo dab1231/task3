@@ -1,6 +1,7 @@
 package com.nik.currencyexchanger.servlet;
 
 import com.google.gson.Gson;
+import com.nik.currencyexchanger.dto.request.ExchangeRequestDto;
 import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
@@ -34,7 +35,8 @@ public class ExchangeServlet extends HttpServlet {
         }
 
         BigDecimal amount = new BigDecimal(amountString);
-        var exchangeDto = exchangeRateService.calculateExchange(baseCode, targetCode, amount);
+        ExchangeRequestDto requestDto = new ExchangeRequestDto(baseCode, targetCode, amount);
+        var exchangeDto = exchangeRateService.calculateExchange(requestDto);
         resp.setStatus(200);
         var jsonString = gson.toJson(exchangeDto);
         resp.getWriter()

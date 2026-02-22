@@ -1,7 +1,8 @@
 package com.nik.currencyexchanger.service;
 
 import com.nik.currencyexchanger.dao.ExchangeRateDao;
-import com.nik.currencyexchanger.dto.ExchangeDto;
+import com.nik.currencyexchanger.dto.request.ExchangeRequestDto;
+import com.nik.currencyexchanger.dto.response.ExchangeDto;
 import com.nik.currencyexchanger.dto.response.ExchangeRateDto;
 import com.nik.currencyexchanger.entity.ExchangeRate;
 import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
@@ -45,10 +46,11 @@ public class ExchangeRateService {
         return buildDto(exchangeRate);
     }
 
-    public ExchangeDto calculateExchange(String baseCode, String targetCode, BigDecimal amount){
-        var baseCurrencyId = currencyService.getCurrencyByCode(baseCode).id();
-        var targetCurrencyId = currencyService.getCurrencyByCode(targetCode).id();
+    public ExchangeDto calculateExchange(ExchangeRequestDto requestDto){
+        var baseCurrencyId = currencyService.getCurrencyByCode(requestDto.baseCode()).id();
+        var targetCurrencyId = currencyService.getCurrencyByCode(requestDto.targetCode()).id();
         var exchangeRateOptional = exchangeRateDao.findByCurrenciesId(baseCurrencyId, targetCurrencyId);
+        var amount = requestDto.amount();
 
         if(exchangeRateOptional.isPresent()){
             var exchangeRate = exchangeRateOptional.get();

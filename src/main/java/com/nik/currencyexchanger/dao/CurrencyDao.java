@@ -1,5 +1,6 @@
 package com.nik.currencyexchanger.dao;
 
+import com.nik.currencyexchanger.dto.request.CurrencyRequestDto;
 import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.exception.CurrencyAlreadyExistsException;
 import com.nik.currencyexchanger.exception.DataBaseException;
@@ -65,22 +66,21 @@ public class CurrencyDao {
         }
     }
 
-    public Currency create(Currency currency){
+    public Currency create(CurrencyRequestDto requestDto){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, currency.getCode());
-            preparedStatement.setString(2, currency.getFullName());
-            preparedStatement.setString(3, currency.getSign());
+            preparedStatement.setString(1, requestDto.code());
+            preparedStatement.setString(2, requestDto.name());
+            preparedStatement.setString(3, requestDto.sign());
             preparedStatement.executeUpdate();
 
-// todo: проверить реализацию (переработать)
             var generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()){
                 return new Currency(
                         generatedKeys.getInt(1),
-                        currency.getCode(),
-                        currency.getFullName(),
-                        currency.getSign()
+                        requestDto.code(),
+                        requestDto.name(),
+                        requestDto.sign()
                 );
 
             }
@@ -88,7 +88,7 @@ public class CurrencyDao {
         } catch (SQLException e) {
             int errorCode = e.getErrorCode();
             if(errorCode == 19 || errorCode == 2067){
-                throw new CurrencyAlreadyExistsException(currency.getCode());
+                throw new CurrencyAlreadyExistsException(requestDto.code());
             }
             throw new DataBaseException("Failed to insert currency");
         }
