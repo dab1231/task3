@@ -7,13 +7,13 @@ import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateAlreadyExistsException;
 import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.ExchangeRateService;
+import com.nik.currencyexchanger.validation.Validator;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 @WebServlet("/exchangeRates")
 public class ExchangeRatesServlet extends HttpServlet {
@@ -44,13 +44,11 @@ public class ExchangeRatesServlet extends HttpServlet {
         var targetCurrencyCode = req.getParameter("targetCurrencyCode");
         var rateString = req.getParameter("rate");
 
-        if (baseCurrencyCode == null || targetCurrencyCode == null || rateString == null
-                || baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank() || rateString.isBlank()) {
-            throw new ValidationException("The required form field is missing.");
-        }
+        var baseCode = Validator.validateCurrencyCode(baseCurrencyCode);
+        var targetCode = Validator.validateCurrencyCode(targetCurrencyCode);
+        var rate = Validator.validateRate(rateString);
 
-        BigDecimal rate = new BigDecimal(rateString);
-        ExchangeRateRequestDto requestDto = new ExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, rate);
+        ExchangeRateRequestDto requestDto = new ExchangeRateRequestDto(baseCode, targetCode, rate);
         var exchangeRateDto = exchangeRateService
                 .createExchangeRate(requestDto);
         resp.setStatus(201);

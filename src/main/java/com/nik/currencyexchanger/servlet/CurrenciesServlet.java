@@ -6,6 +6,7 @@ import com.nik.currencyexchanger.exception.CurrencyAlreadyExistsException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.CurrencyService;
+import com.nik.currencyexchanger.validation.Validator;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,12 +44,12 @@ public class CurrenciesServlet extends HttpServlet {
         var code = req.getParameter("code");
         var sign = req.getParameter("sign");
 
-        if (name == null || code == null || sign == null
-                || name.isBlank() || code.isBlank() || sign.isBlank() || sign.length() > 3) {
-            throw new ValidationException("The required form field is missing.");
-        }
-        CurrencyRequestDto requestDto = new CurrencyRequestDto(code,name, sign);
-        var currency = currencyService.createCurrency(requestDto); // TODO: разобраться с reqDTO и respDTO
+        var validateName = Validator.validateName(name);
+        var validateCurrencyCode = Validator.validateCurrencyCode(code);
+        var validateSign = Validator.validateSign(sign);
+
+        CurrencyRequestDto requestDto = new CurrencyRequestDto(validateCurrencyCode, validateName, validateSign);
+        var currency = currencyService.createCurrency(requestDto);
         resp.setStatus(201);
         var jsonString = gson.toJson(currency);
         resp.getWriter()

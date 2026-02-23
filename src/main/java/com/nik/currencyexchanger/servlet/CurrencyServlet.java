@@ -5,6 +5,7 @@ import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ValidationException;
 import com.nik.currencyexchanger.service.CurrencyService;
+import com.nik.currencyexchanger.validation.Validator;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,10 +36,9 @@ public class CurrencyServlet extends HttpServlet {
         }
 
         var code = pathInfo.substring(1);
-        if(!code.equals(code.toUpperCase())){
-            throw new ValidationException("Currency code must be upper case");
-        }
-        var currencyDto = currencyService.getCurrencyByCode(code);
+
+        var validateCurrencyCode = Validator.validateCurrencyCode(code);
+        var currencyDto = currencyService.getCurrencyByCode(validateCurrencyCode);
 
         resp.setStatus(200);
         var jsonString = gson.toJson(currencyDto);
