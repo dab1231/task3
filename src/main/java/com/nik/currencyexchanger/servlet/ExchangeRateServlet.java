@@ -15,6 +15,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @WebServlet("/exchangeRate/*")
 public class ExchangeRateServlet extends HttpServlet {
@@ -58,8 +61,12 @@ public class ExchangeRateServlet extends HttpServlet {
         if (line == null) {
             throw new ValidationException("The required form field is missing.");
         }
-        var rateLine = line.split("=");
-        var rateString = rateLine[1];
+        var rateString = Arrays.stream(line.split("&"))
+                .map(p -> p.split("=", 2))
+                .filter(kv -> kv[0].equals("rate"))
+                .map(kv -> URLDecoder.decode(kv[1], StandardCharsets.UTF_8))
+                .findFirst()
+                .orElseThrow(() -> new ValidationException("Rate is missing"));
         var rate = Validator.validateRate(rateString);
 
         var requestDto = getExchangeRateRequestDto(req, rate);
