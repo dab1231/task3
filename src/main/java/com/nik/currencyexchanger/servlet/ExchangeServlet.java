@@ -6,7 +6,7 @@ import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
 import com.nik.currencyexchanger.exception.ValidationException;
-import com.nik.currencyexchanger.service.ExchangeRateService;
+import com.nik.currencyexchanger.service.ExchangeService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,12 +19,13 @@ import java.math.BigDecimal;
 @WebServlet("/exchange")
 public class ExchangeServlet extends HttpServlet {
 
-    private ExchangeRateService exchangeRateService;
-    private final Gson gson = new Gson();
+    private ExchangeService exchangeService;
+    private Gson gson;
 
     @Override
     public void init() {
-        exchangeRateService = (ExchangeRateService) getServletContext().getAttribute("exchangeRateService");
+        exchangeService = (ExchangeService) getServletContext().getAttribute("exchangeService");
+        gson = (Gson) getServletContext().getAttribute("gson");
     }
 
     @Override
@@ -41,7 +42,7 @@ public class ExchangeServlet extends HttpServlet {
 
         BigDecimal amount = new BigDecimal(amountString);
         ExchangeRequestDto requestDto = new ExchangeRequestDto(baseCode, targetCode, amount);
-        var exchangeDto = exchangeRateService.calculateExchange(requestDto);
+        var exchangeDto = exchangeService.calculateExchange(requestDto);
         resp.setStatus(200);
         var jsonString = gson.toJson(exchangeDto);
         resp.getWriter()

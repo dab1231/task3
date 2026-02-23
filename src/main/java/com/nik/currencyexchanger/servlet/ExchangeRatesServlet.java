@@ -19,11 +19,12 @@ import java.math.BigDecimal;
 public class ExchangeRatesServlet extends HttpServlet {
 
     private ExchangeRateService exchangeRateService;
-    private final Gson gson = new Gson();
+    private Gson gson;
 
     @Override
     public void init() {
         exchangeRateService = (ExchangeRateService) getServletContext().getAttribute("exchangeRateService");
+        gson = (Gson) getServletContext().getAttribute("gson");
     }
 
     @Override

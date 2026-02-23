@@ -17,11 +17,12 @@ import java.io.IOException;
 public class CurrencyServlet extends HttpServlet {
 
     private CurrencyService currencyService;
-    private final Gson gson = new Gson();
+    private Gson gson;
 
     @Override
     public void init() {
         currencyService = (CurrencyService) getServletContext().getAttribute("currencyService");
+        gson = (Gson) getServletContext().getAttribute("gson");
     }
 
     @Override
