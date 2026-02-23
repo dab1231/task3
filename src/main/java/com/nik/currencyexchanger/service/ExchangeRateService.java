@@ -1,17 +1,24 @@
 package com.nik.currencyexchanger.service;
 
+import com.nik.currencyexchanger.dao.CurrencyDao;
 import com.nik.currencyexchanger.dao.ExchangeRateDao;
 import com.nik.currencyexchanger.dto.request.ExchangeRateRequestDto;
 import com.nik.currencyexchanger.dto.request.ExchangeRequestDto;
-import com.nik.currencyexchanger.dto.response.ExchangeResponseDto;
 import com.nik.currencyexchanger.dto.response.ExchangeRateResponseDto;
+import com.nik.currencyexchanger.dto.response.ExchangeResponseDto;
+import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.entity.ExchangeRate;
 import com.nik.currencyexchanger.exception.ExchangeRateNotFoundException;
+import com.nik.currencyexchanger.mapper.CurrencyMapper;
+import com.nik.currencyexchanger.mapper.ExchangeRateMapper;
+import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExchangeRateService {
 
@@ -19,17 +26,32 @@ public class ExchangeRateService {
     private static final int DECIMAL_SCALE = 6;
     private final ExchangeRateDao exchangeRateDao;
     private final CurrencyService currencyService;
+    private final ExchangeRateMapper exchangeRateMapper = Mappers.getMapper(ExchangeRateMapper.class);
+    private final CurrencyDao currencyDao;
+    private final CurrencyMapper currencyMapper = Mappers.getMapper(CurrencyMapper.class);
 
-    public ExchangeRateService(ExchangeRateDao exchangeRateDao, CurrencyService currencyService){
+    public ExchangeRateService(ExchangeRateDao exchangeRateDao, CurrencyService currencyService, CurrencyDao currencyDao){
         this.exchangeRateDao = exchangeRateDao;
         this.currencyService = currencyService;
+        this.currencyDao = currencyDao;
     }
 
     public List<ExchangeRateResponseDto> getAllExchangeRates(){
         var exchangeRates = exchangeRateDao.findAll();
+        var allCurrencies = currencyDao.findAll();
+        Map<Integer, Currency> currenciesById = new HashMap<>();
+        for(com.nik.currencyexchanger.entity.Currency currency : allCurrencies){
+            currenciesById.put(currency.getId(), currency);
+        }
         List<ExchangeRateResponseDto> exchangeRateDtos = new ArrayList<>();
         for(ExchangeRate exchangeRate : exchangeRates){
-            exchangeRateDtos.add(buildDto(exchangeRate));
+            var baseCurrency = currenciesById.get(exchangeRate.getBaseCurrencyId());
+            var targetCurrency = currenciesById.get(exchangeRate.getTargetCurrencyId());
+            exchangeRateDtos.add(exchangeRateMapper.toDto(
+                    exchangeRate,
+                    currencyMapper.toDto(baseCurrency),
+                    currencyMapper.toDto(targetCurrency)
+            ));
         }
         return exchangeRateDtos;
     }
@@ -40,7 +62,9 @@ public class ExchangeRateService {
 
         var exchangeRate = exchangeRateDao.findByCurrenciesId(baseId, targetId)
                 .orElseThrow(() -> new ExchangeRateNotFoundException());
-        return buildDto(exchangeRate);
+        return exchangeRateMapper.toDto(exchangeRate,
+                currencyService.getCurrencyById(baseId),
+                currencyService.getCurrencyById(targetId));
     }
 
     public ExchangeResponseDto calculateExchange(ExchangeRequestDto requestDto){
@@ -53,7 +77,12 @@ public class ExchangeRateService {
             var exchangeRate = exchangeRateOptional.get();
             var rate = exchangeRate.getRate();
             var convertedAmount = rate.multiply(amount).setScale(DECIMAL_SCALE, ROUNDING_MODE);
-            return buildDto(exchangeRate, amount, convertedAmount);
+            return exchangeRateMapper.toExchangeDto(
+                    exchangeRate,
+                    currencyService.getCurrencyById(baseCurrencyId),
+                    currencyService.getCurrencyById(targetCurrencyId),
+                    amount,
+                    convertedAmount);
         }
         else if (exchangeRateDao.findByCurrenciesId(targetCurrencyId, baseCurrencyId).isPresent()) {
             var reversedExchangeRate
@@ -67,7 +96,12 @@ public class ExchangeRateService {
                     targetCurrencyId,
                     reversedRate
             );
-            return buildDto(exchangeRate, amount, convertedAmount);
+            return exchangeRateMapper.toExchangeDto(
+                    exchangeRate,
+                    currencyService.getCurrencyById(baseCurrencyId),
+                    currencyService.getCurrencyById(targetCurrencyId),
+                    amount,
+                    convertedAmount);
         }
         else{
             var usdId = currencyService.getCurrencyByCode("USD").id();
@@ -86,7 +120,12 @@ public class ExchangeRateService {
                     newRate
             );
             var convertedAmount = newRate.multiply(amount).setScale(2, ROUNDING_MODE);
-            return buildDto(baseToTargetRate, amount, convertedAmount);
+            return exchangeRateMapper.toExchangeDto(
+                    baseToTargetRate,
+                    currencyService.getCurrencyById(baseCurrencyId),
+                    currencyService.getCurrencyById(targetCurrencyId),
+                    amount,
+                    convertedAmount);
         }
     }
 
@@ -94,8 +133,12 @@ public class ExchangeRateService {
         var baseId = currencyService.getCurrencyByCode(requestDto.baseCode()).id();
         var targetId = currencyService.getCurrencyByCode(requestDto.targetCode()).id();
 
-        var responseDto = exchangeRateDao.create(baseId, targetId, requestDto.rate());
-        return buildDto(responseDto);
+        var exchangeRate = exchangeRateDao.create(baseId, targetId, requestDto.rate());
+        return exchangeRateMapper.toDto(
+                exchangeRate,
+                currencyService.getCurrencyById(baseId),
+                currencyService.getCurrencyById(targetId)
+        );
     }
 
     public ExchangeRateResponseDto updateExchangeRate(ExchangeRateRequestDto requestDto){
@@ -103,27 +146,10 @@ public class ExchangeRateService {
         var targetId = currencyService.getCurrencyByCode(requestDto.targetCode()).id();
         var exchangeRate = exchangeRateDao.update(baseId, targetId, requestDto.rate())
                 .orElseThrow(() -> new ExchangeRateNotFoundException());
-        return buildDto(exchangeRate);
-    }
-
-    private ExchangeRateResponseDto buildDto(ExchangeRate exchangeRate){
-        return new ExchangeRateResponseDto(
-                exchangeRate.getId(),
-                currencyService.getCurrencyById(exchangeRate.getBaseCurrencyId()),
-                currencyService.getCurrencyById(exchangeRate.getTargetCurrencyId()),
-                exchangeRate.getRate()
+        return exchangeRateMapper.toDto(
+                exchangeRate,
+                currencyService.getCurrencyById(baseId),
+                currencyService.getCurrencyById(targetId)
         );
     }
-
-    private ExchangeResponseDto buildDto(ExchangeRate exchangeRate, BigDecimal amount, BigDecimal convertedAmount){
-        return new ExchangeResponseDto(
-                currencyService.getCurrencyById(exchangeRate.getBaseCurrencyId()),
-                currencyService.getCurrencyById(exchangeRate.getTargetCurrencyId()),
-                exchangeRate.getRate(),
-                amount,
-                convertedAmount
-        );
-    }
-
-
 }
