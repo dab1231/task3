@@ -1,8 +1,8 @@
 package com.nik.currencyexchanger.dao;
 
-import com.nik.currencyexchanger.dto.request.CurrencyRequestDto;
 import com.nik.currencyexchanger.entity.Currency;
 import com.nik.currencyexchanger.exception.CurrencyAlreadyExistsException;
+import com.nik.currencyexchanger.exception.CurrencyNotFoundException;
 import com.nik.currencyexchanger.exception.DataBaseException;
 import com.nik.currencyexchanger.util.ConnectionManager;
 
@@ -60,21 +60,21 @@ public class CurrencyDao {
         }
     }
 
-    public Currency create(CurrencyRequestDto requestDto){
+    public Currency create(String code, String name, String sign){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, requestDto.code());
-            preparedStatement.setString(2, requestDto.name());
-            preparedStatement.setString(3, requestDto.sign());
+            preparedStatement.setString(1, code);
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, sign);
             preparedStatement.executeUpdate();
 
             var generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()){
                 return new Currency(
                         generatedKeys.getInt(1),
-                        requestDto.code(),
-                        requestDto.name(),
-                        requestDto.sign()
+                        code,
+                        name,
+                        sign
                 );
 
             }
@@ -82,7 +82,7 @@ public class CurrencyDao {
         } catch (SQLException e) {
             int errorCode = e.getErrorCode();
             if(errorCode == 19 || errorCode == 2067){
-                throw new CurrencyAlreadyExistsException(requestDto.code());
+                throw new CurrencyAlreadyExistsException(code);
             }
             throw new DataBaseException("Failed to insert currency");
         }
@@ -128,7 +128,7 @@ public class CurrencyDao {
         }
     }
 
-    public void update(Currency currency){
+    public Currency update(Currency currency){
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setString(1, currency.getCode());
@@ -136,7 +136,11 @@ public class CurrencyDao {
             preparedStatement.setString(3, currency.getSign());
             preparedStatement.setInt(4, currency.getId());
 
-            preparedStatement.executeUpdate();
+            var executed = preparedStatement.executeUpdate();
+            if (executed == 0) {
+                throw new CurrencyNotFoundException("Currency not found");
+            }
+            return currency;
         } catch (SQLException e) {
             throw new DataBaseException("DB error",e);
         }

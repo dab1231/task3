@@ -17,10 +17,6 @@ public class CurrencyService {
         this.currencyDao = currencyDao;
     }
 
-    public static CurrencyService getInstance(){
-        return INSTANCE;
-    }
-
     public List<CurrencyResponseDto> getAllCurrencies(){
         var currenciesEntity = currencyDao.findAll();
         List<CurrencyResponseDto> currencyDtos = new ArrayList<>();
@@ -43,7 +39,10 @@ public class CurrencyService {
     }
 
     public CurrencyResponseDto createCurrency(CurrencyRequestDto requestDto){
-        var currency = currencyDao.create(requestDto);
+        var code = requestDto.code();
+        var name = requestDto.name();
+        var sign = requestDto.sign();
+        var currency = currencyDao.create(code, name ,sign);
         return buildDto(currency);
     }
 

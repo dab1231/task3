@@ -70,6 +70,9 @@ public class ExchangeRateServlet extends HttpServlet {
         }
         var rateLine = line.split("=");
         var rateString = rateLine[1];
+        if(new BigDecimal(rateString).compareTo(BigDecimal.ZERO) <= 0){
+            throw new ValidationException("Error, rate must be positive");
+        }
 
         var requestDto = getExchangeRateRequestDto(req, rateString);
         var exchangeRateDto = exchangeRateService.updateExchangeRate(requestDto);

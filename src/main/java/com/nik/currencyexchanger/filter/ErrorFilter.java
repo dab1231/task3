@@ -9,7 +9,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-@WebFilter("/*")
+@WebFilter(urlPatterns = {
+        "/currencies",
+        "/currency/*",
+        "/exchangeRates",
+        "/exchangeRate/*",
+        "/exchange"
+})
 public class ErrorFilter implements Filter {
 
     private final Gson gson = new Gson();

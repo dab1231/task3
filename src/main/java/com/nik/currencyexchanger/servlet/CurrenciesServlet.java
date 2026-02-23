@@ -46,7 +46,7 @@ public class CurrenciesServlet extends HttpServlet {
                 || name.isBlank() || code.isBlank() || sign.isBlank() || sign.length() > 3) {
             throw new ValidationException("The required form field is missing.");
         }
-        CurrencyRequestDto requestDto = new CurrencyRequestDto(name, code, sign);
+        CurrencyRequestDto requestDto = new CurrencyRequestDto(code,name, sign);
         var currency = currencyService.createCurrency(requestDto); // TODO: разобраться с reqDTO и respDTO
         resp.setStatus(201);
         var jsonString = gson.toJson(currency);
