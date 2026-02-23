@@ -18,8 +18,13 @@ import java.math.BigDecimal;
 @WebServlet("/exchangeRate/*")
 public class ExchangeRateServlet extends HttpServlet {
 
-    private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
+    private ExchangeRateService exchangeRateService;
     private final Gson gson = new Gson();
+
+    @Override
+    public void init() {
+        exchangeRateService = (ExchangeRateService) getServletContext().getAttribute("exchangeRateService");
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -65,6 +70,15 @@ public class ExchangeRateServlet extends HttpServlet {
         }
         var rateString = line.substring(5);
 
+        var requestDto = getExchangeRateRequestDto(req, rateString);
+        var exchangeRateDto = exchangeRateService.updateExchangeRate(requestDto);
+        resp.setStatus(200);
+        var jsonString = gson.toJson(exchangeRateDto);
+        resp.getWriter()
+                .write(jsonString);
+    }
+
+    private static ExchangeRateRequestDto getExchangeRateRequestDto(HttpServletRequest req, String rateString) {
         BigDecimal rate = new BigDecimal(rateString);
 
 
@@ -80,11 +94,6 @@ public class ExchangeRateServlet extends HttpServlet {
         var targetCode = baseAndTargetCode.substring(3);
         var baseCode = baseAndTargetCode.substring(0, 3);
 
-        ExchangeRateRequestDto requestDto = new ExchangeRateRequestDto(baseCode, targetCode, rate);
-        var exchangeRateDto = exchangeRateService.updateExchangeRate(requestDto);
-        resp.setStatus(200);
-        var jsonString = gson.toJson(exchangeRateDto);
-        resp.getWriter()
-                .write(jsonString);
+        return new ExchangeRateRequestDto(baseCode, targetCode, rate);
     }
 }
