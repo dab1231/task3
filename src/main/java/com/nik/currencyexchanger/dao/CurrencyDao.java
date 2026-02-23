@@ -44,10 +44,6 @@ public class CurrencyDao {
 
     }
 
-    public static CurrencyDao getInstance(){
-        return INSTANCE;
-    }
-
     public Optional<Currency> findByCode(String code){
         try (var connection = ConnectionManager.get();
             var preparedStatement = connection.prepareStatement(SELECT_BY_CODE_SQL)) {

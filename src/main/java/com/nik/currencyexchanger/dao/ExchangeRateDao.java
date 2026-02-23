@@ -42,10 +42,6 @@ public class ExchangeRateDao {
 
     }
 
-    public static ExchangeRateDao getInstance(){
-        return INSTANCE;
-    }
-
     public Optional<ExchangeRate> update(int baseCurrencyId, int targetCurrencyId, BigDecimal rate){
         try (var connection = ConnectionManager.get();
             var  preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
