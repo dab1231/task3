@@ -16,8 +16,6 @@ import java.util.Optional;
 
 public class ExchangeRateDao {
 
-    private static final ExchangeRateDao INSTANCE = new ExchangeRateDao();
-
     private static final String SELECT_ALL_SQL = """
             SELECT id, base_currency_id, target_currency_id, rate
             FROM ExchangeRates
@@ -40,7 +38,7 @@ public class ExchangeRateDao {
             WHERE base_currency_id = ? AND target_currency_id = ?
             """;
 
-    private ExchangeRateDao(){
+    public ExchangeRateDao(){
 
     }
 

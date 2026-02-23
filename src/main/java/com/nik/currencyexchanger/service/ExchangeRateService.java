@@ -17,16 +17,12 @@ public class ExchangeRateService {
 
     private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
     private static final int DECIMAL_SCALE = 6;
-    private static final ExchangeRateService INSTANCE = new ExchangeRateService();
-    private final ExchangeRateDao exchangeRateDao = ExchangeRateDao.getInstance();
-    private final CurrencyService currencyService = CurrencyService.getInstance();
+    private final ExchangeRateDao exchangeRateDao;
+    private final CurrencyService currencyService;
 
-    private ExchangeRateService(){
-
-    }
-
-    public static ExchangeRateService getInstance(){
-        return INSTANCE;
+    public ExchangeRateService(ExchangeRateDao exchangeRateDao, CurrencyService currencyService){
+        this.exchangeRateDao = exchangeRateDao;
+        this.currencyService = currencyService;
     }
 
     public List<ExchangeRateResponseDto> getAllExchangeRates(){

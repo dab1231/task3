@@ -15,8 +15,6 @@ import java.util.Optional;
 
 public class CurrencyDao {
 
-    private static final CurrencyDao INSTANCE = new CurrencyDao();
-
     private static final String INSERT_SQL = """
             INSERT INTO Currency (code, full_name, sign) 
             VALUES
@@ -42,7 +40,7 @@ public class CurrencyDao {
             WHERE code = ?
             """;
 
-    private CurrencyDao(){
+    public CurrencyDao(){
 
     }
 

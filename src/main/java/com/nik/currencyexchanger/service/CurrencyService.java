@@ -11,11 +11,10 @@ import java.util.List;
 
 public class CurrencyService {
 
-    private static final CurrencyService INSTANCE = new CurrencyService();
-    private final CurrencyDao currencyDao = CurrencyDao.getInstance();
+    private final CurrencyDao currencyDao;
 
-    private CurrencyService(){
-
+    public CurrencyService(CurrencyDao currencyDao){
+        this.currencyDao = currencyDao;
     }
 
     public static CurrencyService getInstance(){
