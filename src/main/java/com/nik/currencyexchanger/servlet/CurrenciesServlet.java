@@ -17,8 +17,13 @@ import java.io.IOException;
 @WebServlet("/currencies")
 public class CurrenciesServlet extends HttpServlet {
 
-    private final CurrencyService currencyService = CurrencyService.getInstance();
+    private CurrencyService currencyService;
     private final Gson gson = new Gson();
+
+    @Override
+    public void init() {
+        currencyService = (CurrencyService) getServletContext().getAttribute("currencyService");
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, DataBaseException {

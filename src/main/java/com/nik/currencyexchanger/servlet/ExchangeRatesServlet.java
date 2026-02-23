@@ -18,8 +18,13 @@ import java.math.BigDecimal;
 @WebServlet("/exchangeRates")
 public class ExchangeRatesServlet extends HttpServlet {
 
-    private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
+    private ExchangeRateService exchangeRateService;
     private final Gson gson = new Gson();
+
+    @Override
+    public void init() {
+        exchangeRateService = (ExchangeRateService) getServletContext().getAttribute("exchangeRateService");
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, DataBaseException {
