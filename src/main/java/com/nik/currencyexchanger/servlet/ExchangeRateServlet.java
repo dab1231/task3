@@ -68,7 +68,8 @@ public class ExchangeRateServlet extends HttpServlet {
         if (line == null) {
             throw new ValidationException("The required form field is missing.");
         }
-        var rateString = line.substring(5);
+        var rateLine = line.split("=");
+        var rateString = rateLine[1];
 
         var requestDto = getExchangeRateRequestDto(req, rateString);
         var exchangeRateDto = exchangeRateService.updateExchangeRate(requestDto);
